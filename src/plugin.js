@@ -1,8 +1,8 @@
 "use strict";
-import url from "url";
-import path from "path";
-import { WASI } from "wasi";
-import fs from "fs/promises";
+import url from "node:url";
+import path from "node:path";
+import { WASI } from "node:wasi";
+import fs from "node:fs/promises";
 
 /**
  * @typedef {object} PluginOptions
