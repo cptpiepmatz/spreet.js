@@ -40,20 +40,14 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.event.inputs.publish == 'true'
+    permissions:
+      contents: read
+      id-token: write
     steps:
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          registry-url: "https://npm.pkg.github.com"
-
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: dist
           path: .
 
-      - name: Publish to GitHub npm registry
-        run: npm publish --registry=https://npm.pkg.github.com/
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: npx jsr publish
