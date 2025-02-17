@@ -4,6 +4,7 @@ version = "0.1.0-dev.1"
 authors = ["Tim 'Piepmatz' Hesse <git+github@cptpiepmatz.de>"]
 edition = "2021"
 license = "MIT"
+repository = "https://github.com/cptpiepmatz/tag-uri.git"
 
 [package.metadata]
 scope = "@cptpiepmatz"
