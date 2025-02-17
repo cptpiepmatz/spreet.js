@@ -1,6 +1,6 @@
 [package]
 name = "esbuild-plugin-spreet"
-version = "0.0.1"
+version = "0.1.0-dev.1"
 authors = ["Tim 'Piepmatz' Hesse <git+github@cptpiepmatz.de>"]
 edition = "2021"
 license = "MIT"
