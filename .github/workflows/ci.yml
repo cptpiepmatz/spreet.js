@@ -2,6 +2,7 @@ name: continuous-integration
 
 on:
   push:
+  workflow_dispatch:
 
 env:
   RUSTFLAGS: ""
@@ -23,4 +24,29 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
+          name: package
           path: dist
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: "https://npm.pkg.github.com"
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Publish to GitHub npm registry
+        run: npm publish --registry=https://npm.pkg.github.com/
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
