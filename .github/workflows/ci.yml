@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: "Publish to GitHub npm registry?"
+        description: "Publish to JSR?"
         required: true
         default: "false"
         type: choice
