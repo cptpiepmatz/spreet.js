@@ -1,0 +1,15 @@
+[config]
+skip_core_tasks = true
+
+[tasks.download-esbuild]
+command = "npm"
+args = ["install", "esbuild", "--no-save", "--no-package-lock"]
+
+[tasks.wasm]
+command = "cargo"
+args = ["build", "--target", "wasm32-wasip1", "--release"]
+
+[tasks.build]
+dependencies = ["wasm"]
+command = "cargo"
+args = ["run", "--bin", "postbuild"]

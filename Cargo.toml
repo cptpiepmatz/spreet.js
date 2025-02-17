@@ -1,0 +1,25 @@
+[package]
+name = "esbuild-plugin-spreet"
+version = "0.0.1"
+authors = ["Tim 'Piepmatz' Hesse <git+github@cptpiepmatz.de>"]
+edition = "2021"
+license = "MIT"
+
+[package.metadata.package-json]
+scope = "@cptpiepmatz"
+main = "dist/plugin.js"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "postbuild"
+path = "scripts/postbuild.rs"
+
+[dependencies]
+spreet = { version = "0.11.0", default-features = false }
+oxipng = { version = "9.0", features = ["freestanding"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+static-toml = "1.3.0"
+
