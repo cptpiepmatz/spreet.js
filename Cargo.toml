@@ -5,9 +5,8 @@ authors = ["Tim 'Piepmatz' Hesse <git+github@cptpiepmatz.de>"]
 edition = "2021"
 license = "MIT"
 
-[package.metadata.package-json]
+[package.metadata]
 scope = "@cptpiepmatz"
-main = "dist/plugin.js"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

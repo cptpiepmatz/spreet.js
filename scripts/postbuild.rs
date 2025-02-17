@@ -11,7 +11,7 @@ fn main() -> io::Result<()> {
     fs::create_dir_all("dist")?;
     copy_wasm()?;
     copy_plugin_js()?;
-    build_package_json()?;
+    build_jsr_json()?;
     Ok(())
 }
 
@@ -33,18 +33,23 @@ fn copy_plugin_js() -> io::Result<()> {
     Ok(())
 }
 
-fn build_package_json() -> io::Result<()> {
+fn build_jsr_json() -> io::Result<()> {
     let name = format!(
         "{}/{}",
-        CARGO_TOML.package.metadata.package_json.scope, CARGO_TOML.package.name
+        CARGO_TOML.package.metadata.scope, CARGO_TOML.package.name
     );
     let package = json!({
         "name": name,
         "version": CARGO_TOML.package.version,
-        "main": "dist/plugin.js",
-        "type": "module"
+        "exports": "./plugin.js",
+        "publish": {
+            "include": [
+                "plugin.js",
+                "esbuild_plugin_spreet.wasm"
+            ]
+        }
     });
 
     let json = serde_json::to_string_pretty(&package).expect("valid json");
-    fs::write("dist/package.json", json)
+    fs::write("dist/jsr.json", json)
 }
