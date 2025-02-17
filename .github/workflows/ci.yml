@@ -3,6 +3,9 @@ name: continuous-integration
 on:
   push:
 
+env:
+  RUSTFLAGS: ""
+
 jobs:
   build:
     runs-on: "ubuntu-latest"
