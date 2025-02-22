@@ -12,8 +12,8 @@ fn main() -> io::Result<()> {
     fs::create_dir_all("dist")?;
     copy_wasm()?;
     copy_license()?;
-    copy_plugin_ts()?;
-    build_deno_json()?;
+    copy_plugin_mts()?;
+    build_jsr_json()?;
     Ok(())
 }
 
@@ -32,30 +32,24 @@ fn copy_license() -> io::Result<()> {
     Ok(())
 }
 
-fn copy_plugin_ts() -> io::Result<()> {
-    fs::copy("src/plugin.ts", "dist/plugin.ts")?;
+fn copy_plugin_mts() -> io::Result<()> {
+    fs::copy("src/plugin.mts", "dist/plugin.mts")?;
 
     Ok(())
 }
 
-fn build_deno_json() -> io::Result<()> {
+fn build_jsr_json() -> io::Result<()> {
     let name = format!(
         "{}/{}",
-        CARGO_TOML.package.metadata.deno.scope, CARGO_TOML.package.name
+        CARGO_TOML.package.metadata.jsr.scope, CARGO_TOML.package.name
     );
     let package = json!({
         "name": name,
         "version": CARGO_TOML.package.version,
         "author": CARGO_TOML.package.authors.0,
         "license": CARGO_TOML.package.license,
-        "exports": "./plugin.ts",
-        "publish": {
-            "include": [
-                "plugin.ts",
-                "esbuild_plugin_spreet.wasm",
-                "LICENSE"
-            ]
-        },
+        "exports": CARGO_TOML.package.metadata.jsr.exports,
+        "publish": CARGO_TOML.package.metadata.jsr.publish,
         "repository": {
             "type": "git",
             "url": CARGO_TOML.package.repository
@@ -63,5 +57,5 @@ fn build_deno_json() -> io::Result<()> {
     });
 
     let json = serde_json::to_string_pretty(&package).expect("valid json");
-    fs::write("dist/deno.json", json)
+    fs::write("dist/jsr.json", json)
 }

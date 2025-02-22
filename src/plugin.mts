@@ -50,7 +50,8 @@ export default function plugin(options: PluginOptions): Plugin {
       });
       const wasmBuffer = await fs.readFile(__wasm);
       const wasm = await WebAssembly.compile(wasmBuffer);
-      const instance = await WebAssembly.instantiate(wasm);
+      // @ts-ignore typescript types don't understand the getImportObject here
+      const instance = await WebAssembly.instantiate(wasm, wasi.getImportObject());
 
       wasi.start(instance);
       const exports = instance.exports as unknown as WasmExports;
