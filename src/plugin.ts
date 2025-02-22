@@ -18,13 +18,18 @@ export interface PluginOptions {
   sdf?: boolean;
 }
 
+interface Plugin {
+  name: "esbuild-plugin-spreet",
+  setup: () => Promise<void>,
+}
+
 interface WasmExports {
   alloc_string: (len: number) => number;
   plugin: (buf: number, len: number) => void;
   memory: WebAssembly.Memory;
 }
 
-export default function plugin(options: PluginOptions) {
+export default function plugin(options: PluginOptions): Plugin {
   return {
     name: "esbuild-plugin-spreet",
     async setup() {
