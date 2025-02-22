@@ -23,7 +23,7 @@ pub struct PluginOptions {
 /// This is mostly just a 1:1 translation from the cli for spreet.
 /// See [spreet/main.rs](https://github.com/flother/spreet/blob/master/src/bin/spreet/main.rs).
 // #[wasm_bindgen]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub fn plugin(buf: *mut u8, len: usize) {
     // SAFETY: we trust that only our js code calls this
     let options = unsafe { load_string(buf, len) };
@@ -104,10 +104,10 @@ pub fn plugin(buf: *mut u8, len: usize) {
     };
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub fn _start() {}
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub fn alloc_string(len: usize) -> *mut u8 {
     let string = String::with_capacity(len);
     let (ptr, _, _) = string.into_raw_parts();
@@ -115,6 +115,6 @@ pub fn alloc_string(len: usize) -> *mut u8 {
 }
 
 unsafe fn load_string(buf: *mut u8, len: usize) -> String {
-    let buf = Vec::from_raw_parts(buf, len, len);
+    let buf = unsafe { Vec::from_raw_parts(buf, len, len) };
     String::from_utf8(buf).expect("valid utf-8 string")
 }

@@ -3,7 +3,6 @@ import url from "node:url";
 import path from "node:path";
 import { WASI } from "node:wasi";
 import fs from "node:fs/promises";
-import type { Plugin, PluginBuild } from "npm:esbuild";
 
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,10 +24,10 @@ interface WasmExports {
   memory: WebAssembly.Memory;
 }
 
-export default function plugin(options: PluginOptions): Plugin {
+export default function plugin(options: PluginOptions) {
   return {
     name: "esbuild-plugin-spreet",
-    async setup(_build: PluginBuild) {
+    async setup() {
       if (!options.input) throw new Error("missing input");
       if (!options.output) throw new Error("missing output");
 

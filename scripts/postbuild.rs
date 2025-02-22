@@ -3,7 +3,7 @@ use static_toml::static_toml;
 use std::{fs, io};
 
 static_toml! {
-    #[derive(Debug)]
+    #[derive(Debug, ::serde::Serialize)]
     #[static_toml(prefer_slices = false)]
     static CARGO_TOML = include_toml!("Cargo.toml");
 }
