@@ -1,12 +1,12 @@
 [package]
 name = "esbuild-plugin-spreet"
-version = "0.1.0-dev.1"
+version = "0.1.0-dev.2"
 authors = ["Tim 'Piepmatz' Hesse <git+github@cptpiepmatz.de>"]
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/cptpiepmatz/tag-uri.git"
+repository = "https://github.com/cptpiepmatz/esbuild-plugin-spreet.git"
 
-[package.metadata]
+[package.metadata.deno]
 scope = "@cptpiepmatz"
 
 [lib]

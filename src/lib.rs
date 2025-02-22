@@ -1,10 +1,10 @@
 #![feature(vec_into_raw_parts)]
 
 use serde::Deserialize;
-use std::{borrow::Cow, collections::BTreeMap, path::PathBuf};
 use spreet::{Sprite, Spritesheet};
+use std::{collections::BTreeMap, path::PathBuf};
 
-#[derive(Debug,  Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PluginOptions {
     pub input: PathBuf,
@@ -29,7 +29,11 @@ pub fn plugin(buf: *mut u8, len: usize) {
     let options = unsafe { load_string(buf, len) };
     let options: PluginOptions = serde_json::from_str(&options).unwrap();
 
-    let output = options.output.file_name().map(|s| s.to_string_lossy()).unwrap_or_default();
+    let output = options
+        .output
+        .file_name()
+        .map(|s| s.to_string_lossy())
+        .unwrap_or_default();
     let output = PathBuf::from(format!("/output/{output}"));
 
     // The ratio between the pixels in an SVG image and the pixels in the resulting PNG sprite.
@@ -48,7 +52,8 @@ pub fn plugin(buf: *mut u8, len: usize) {
     // std::fs::write(output, out).unwrap();
     // return;
 
-    let sprites = options.files
+    let sprites = options
+        .files
         .iter()
         .map(|file| {
             let svg_path = format!("/input/{file}");
