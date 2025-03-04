@@ -49,6 +49,8 @@ fn copy_files() -> io::Result<()> {
     let sources: Vec<_> = CARGO_TOML.package.metadata.jsr.publish.include.iter().map(PathBuf::from).collect();
     
     let attributes = Attributes {
+        #[cfg(unix)]
+        ownership: Preserve::No { explicit: false },
         mode: Preserve::No { explicit: false },
         timestamps: Preserve::No { explicit: false },
         context: Preserve::No { explicit: false },
