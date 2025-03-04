@@ -67,7 +67,7 @@ fn copy_files() -> io::Result<()> {
         no_target_dir: false, // Allow copying multiple sources into the target directory
         one_file_system: false, // Allow copying across file systems
         overwrite: OverwriteMode::Clobber(ClobberMode::Force), // Overwrite existing files without prompt
-        parents: false, // Do not create parent directories
+        parents: true, // Create parent directories
         sparse_mode: SparseMode::Auto, // Automatically detect sparse files
         strip_trailing_slashes: false, // Do not strip trailing slashes from source arguments
         reflink_mode: ReflinkMode::Never,
