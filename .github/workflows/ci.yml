@@ -17,7 +17,7 @@ env:
   RUSTFLAGS: ""
 
 jobs:
-  build:
+  ci:
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v4
@@ -41,6 +41,11 @@ jobs:
       - name: Do postbuild actions
         run: cargo run --bin postbuild --features postbuild
 
+      - name: Install Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
       - name: Run E2E tests
         run: deno test --allow-write --allow-read
 
@@ -50,7 +55,7 @@ jobs:
           path: dist
 
   publish:
-    needs: build
+    needs: ci
     runs-on: ubuntu-latest
     if: github.event.inputs.publish == 'true'
     permissions:
