@@ -36,7 +36,7 @@ jobs:
           tool: wasm-bindgen
       
       - name: Prepare WASM for Typescript
-        run: wasm-bindgen target\wasm32-unknown-unknown\release\spreet_js_imports.wasm --out-dir imports --target deno
+        run: wasm-bindgen target/wasm32-unknown-unknown/release/spreet_js_imports.wasm --out-dir imports --target deno
 
       - name: Do postbuild actions
         run: cargo run --bin postbuild
