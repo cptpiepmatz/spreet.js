@@ -961,7 +961,7 @@ dependencies = [
 
 [[package]]
 name = "spreet-js-imports"
-version = "0.1.0-dev.2"
+version = "0.1.0-dev.3"
 dependencies = [
  "js-sys",
  "oxipng",

@@ -12,6 +12,8 @@ static_toml! {
 fn main() -> io::Result<()> {
     prepare_dist_dir()?;
     build_jsr_json()?;
+    rm_package_json()?;
+    update_imports()?;
     copy_files()?;
     Ok(())
 }
@@ -42,6 +44,17 @@ fn build_jsr_json() -> io::Result<()> {
 
     let json = serde_json::to_string_pretty(&package).expect("valid json");
     fs::write("dist/jsr.json", json)
+}
+
+fn rm_package_json() -> io::Result<()> {
+    fs::remove_file("imports/package.json")
+}
+
+fn update_imports() -> io::Result<()> {
+    let bg_js = fs::read_to_string("imports/spreet_js_imports_bg.js")?;
+    let bj_js = bg_js.replace("from 'util'", "from 'node:util'");
+    fs::write("imports/spreet_js_imports_bg.js", bj_js)?;
+    Ok(())
 }
 
 fn copy_files() -> io::Result<()> {
