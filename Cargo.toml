@@ -1,6 +1,6 @@
 [package]
 name = "spreet-js-imports"
-version = "0.1.0-dev.1"
+version = "0.1.0-dev.2"
 authors = ["Tim 'Piepmatz' Hesse <git+github@cptpiepmatz.de>"]
 edition = "2024"
 license = "MIT"
