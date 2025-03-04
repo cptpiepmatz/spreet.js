@@ -14,7 +14,7 @@ export def "build wasm" [] {
 }
 
 export def "build postbuild" [] {
-  ^cargo run --bin postbuild
+  ^cargo run --bin postbuild --features postbuild
 }
 
 export def "test" [] {
