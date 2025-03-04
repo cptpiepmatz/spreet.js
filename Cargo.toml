@@ -7,9 +7,13 @@ license = "MIT"
 repository = "https://github.com/cptpiepmatz/spreet.js.git"
 
 [package.metadata.jsr]
-name = "@cptpiepmatz/spreet.js"
-exports = "./plugin.mts"
-publish.include = ["plugin.mts", "esbuild_plugin_spreet.wasm", "LICENSE"]
+name = "@cptpiepmatz/spreet"
+exports = "./src/lib.ts"
+publish.include = [
+  "src/lib.ts", 
+  "imports", 
+  "LICENSE"
+]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -31,4 +35,5 @@ thiserror = "2.0.12"
 js-sys = "0.3.77"
 serde-wasm-bindgen = "0.6.5"
 serde_bytes = "0.11"
+uu_cp = "0.0.29"
 

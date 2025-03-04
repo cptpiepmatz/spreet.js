@@ -25,11 +25,21 @@ jobs:
       - name: Setup Rust toolchain and cache
         uses: actions-rust-lang/setup-rust-toolchain@v1.10.1
         with:
-          toolchain: nightly-2025-02-21
-          target: wasm32-wasip1
+          target: wasm32-unknown-unknown
 
-      - run: cargo build --target wasm32-wasip1 --release
-      - run: cargo run --bin postbuild
+      - name: Build WASM package
+        run: cargo build --target wasm32-unknown-unknown --release
+
+      - name: Setup wasm-bindgen  
+        uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-bindgen
+      
+      - name: Prepare WASM for Typescript
+        run: wasm-bindgen target\wasm32-unknown-unknown\release\spreet_js_imports.wasm --out-dir imports --target deno
+
+      - name: Do postbuild actions
+        run: cargo run --bin postbuild
 
       - uses: actions/upload-artifact@v4
         with:
