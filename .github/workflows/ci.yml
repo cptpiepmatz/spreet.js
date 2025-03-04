@@ -39,7 +39,7 @@ jobs:
         run: wasm-bindgen target/wasm32-unknown-unknown/release/spreet_js_imports.wasm --out-dir imports --target deno
 
       - name: Do postbuild actions
-        run: cargo run --bin postbuild
+        run: cargo run --bin postbuild --features postbuild
 
       - uses: actions/upload-artifact@v4
         with:
