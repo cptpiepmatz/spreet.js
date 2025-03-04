@@ -1,13 +1,13 @@
 [package]
-name = "esbuild-plugin-spreet"
-version = "0.1.0-dev.3"
+name = "spreet-js-imports"
+version = "0.1.0-dev.1"
 authors = ["Tim 'Piepmatz' Hesse <git+github@cptpiepmatz.de>"]
 edition = "2024"
 license = "MIT"
-repository = "https://github.com/cptpiepmatz/esbuild-plugin-spreet.git"
+repository = "https://github.com/cptpiepmatz/spreet.js.git"
 
 [package.metadata.jsr]
-scope = "@cptpiepmatz"
+name = "@cptpiepmatz/spreet.js"
 exports = "./plugin.mts"
 publish.include = ["plugin.mts", "esbuild_plugin_spreet.wasm", "LICENSE"]
 
@@ -24,4 +24,11 @@ oxipng = { version = "9.0", features = ["freestanding"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 static-toml = "1.3.0"
+wasm-bindgen = "0.2.100"
+tsify-next = { version = "0.5.5", default-features = false, features = ["js"] }
+features = { version = "0.10.0", default-features = false }
+thiserror = "2.0.12"
+js-sys = "0.3.77"
+serde-wasm-bindgen = "0.6.5"
+serde_bytes = "0.11"
 

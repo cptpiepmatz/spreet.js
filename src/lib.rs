@@ -1,40 +1,48 @@
-#![feature(vec_into_raw_parts)]
+use serde::{Deserialize, Serialize};
+use spreet::{resvg::usvg::{self, TreeParsing}, Sprite, Spritesheet};
+use thiserror::Error;
+use std::collections::BTreeMap;
+use wasm_bindgen::prelude::*;
+use tsify_next::Tsify;
+use serde_bytes::ByteBuf;
 
-use serde::Deserialize;
-use spreet::{Sprite, Spritesheet};
-use std::{collections::BTreeMap, path::PathBuf};
-
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Tsify, Default)]
 #[serde(rename_all = "camelCase")]
-pub struct PluginOptions {
-    pub input: PathBuf,
-    pub output: PathBuf,
-    pub files: Vec<String>,
+#[tsify(from_wasm_abi)]
+pub struct Options {
+    #[tsify(optional)]
     pub ratio: Option<u8>,
+    #[tsify(optional)]
     pub retina: Option<bool>,
+    #[tsify(optional)]
     pub unique: Option<bool>,
+    #[tsify(optional)]
     pub minify_index_file: Option<bool>,
+    #[tsify(optional)]
     pub sdf: Option<bool>,
+    #[tsify(optional)]
+    pub pretty_json: Option<bool>,
 }
 
-/// Plugin.
-///
-/// # Note
-/// This is mostly just a 1:1 translation from the cli for spreet.
-/// See [spreet/main.rs](https://github.com/flother/spreet/blob/master/src/bin/spreet/main.rs).
-// #[wasm_bindgen]
-#[unsafe(no_mangle)]
-pub fn plugin(buf: *mut u8, len: usize) {
-    // SAFETY: we trust that only our js code calls this
-    let options = unsafe { load_string(buf, len) };
-    let options: PluginOptions = serde_json::from_str(&options).unwrap();
+#[derive(Debug, Deserialize, Tsify)]
+#[tsify(from_wasm_abi)]
+pub struct SpriteSvg {
+    // final name of sprite, truncating the ".svg" needs to be handled on the js side
+    pub name: String,
+    pub content: ByteBuf,
+}
 
-    let output = options
-        .output
-        .file_name()
-        .map(|s| s.to_string_lossy())
-        .unwrap_or_default();
-    let output = PathBuf::from(format!("/output/{output}"));
+#[derive(Serialize, Tsify)]
+#[tsify(into_wasm_abi)]
+pub struct Output {
+    #[serde(with = "serde_bytes")]
+    pub png: ByteBuf,
+    pub json: String,
+}
+
+#[wasm_bindgen]
+pub fn spreet_impl(files: Vec<SpriteSvg>, options: Option<Options>) -> Result<Output, Error> {
+    let options = options.unwrap_or_default();
 
     // The ratio between the pixels in an SVG image and the pixels in the resulting PNG sprite.
     // A value of 2 means the PNGs will be double the size of the SVG images.
@@ -44,36 +52,14 @@ pub fn plugin(buf: *mut u8, len: usize) {
         _ => 1,
     };
 
-    // let mut out = std::fs::read_to_string("/input/ab.svg").unwrap();
-    // for dir in std::fs::read_dir("/input").unwrap() {
-    //     let dir = dir.unwrap();
-    // };
-
-    // std::fs::write(output, out).unwrap();
-    // return;
-
-    let sprites = options
-        .files
-        .iter()
-        .map(|file| {
-            let svg_path = format!("/input/{file}");
-            if let Ok(tree) = spreet::load_svg(&svg_path) {
-                let sprite = if options.sdf.unwrap_or(false) {
-                    Sprite::new_sdf(tree, pixel_ratio).expect("failed to load an SDF sprite")
-                } else {
-                    Sprite::new(tree, pixel_ratio).expect("failed to load a sprite")
-                };
-                let name = file.strip_suffix(".svg").unwrap().to_string();
-                (name, sprite)
-            } else {
-                panic!("{svg_path:?}: not a valid SVG image");
-            }
-        })
-        .collect::<BTreeMap<String, Sprite>>();
-
-    if sprites.is_empty() {
-        panic!("no valid SVGs found in {:?}", options.input);
-    }
+    let sprites = files.iter().map(|SpriteSvg { name, content }| {
+        let tree = usvg::Tree::from_data(content, &usvg::Options::default())?;
+        let sprite = match options.sdf {
+            Some(true) => Sprite::new_sdf(tree, pixel_ratio).ok_or_else(|| Error::SdfSprite(name.clone()))?,
+            _ => Sprite::new(tree, pixel_ratio).ok_or_else(|| Error::Sprite(name.clone()))?,
+        };
+        Ok((name.clone(), sprite))
+    }).collect::<Result<BTreeMap<String, Sprite>, Error>>()?;
 
     let mut spritesheet_builder = Spritesheet::build();
     spritesheet_builder.sprites(sprites);
@@ -84,37 +70,64 @@ pub fn plugin(buf: *mut u8, len: usize) {
         spritesheet_builder.make_sdf();
     };
 
-    // Generate sprite sheet
-    let Some(spritesheet) = spritesheet_builder.generate() else {
-        panic!("could not pack the sprites within an area fifty times their size.");
+    let spritesheet = spritesheet_builder.generate().ok_or(Error::Generate)?;
+    let png = spritesheet.encode_png()?.into();
+    let index = spritesheet.get_index().clone();
+    let json = match options.pretty_json {
+        Some(true) => serde_json::to_string_pretty(&index).unwrap(),
+        _ => serde_json::to_string(&index).unwrap(),
     };
-
-    // Save the bitmapped spritesheet to a local PNG.
-    let file_prefix = output.to_string_lossy();
-    let file_prefix: &str = &file_prefix;
-    let spritesheet_path = format!("{file_prefix}.png");
-    if let Err(e) = spritesheet.save_spritesheet(&spritesheet_path) {
-        panic!("could not save spritesheet to {spritesheet_path} ({e})");
-    };
-
-    // Save the index file to a local JSON file with the same name as the spritesheet.
-    if let Err(e) = spritesheet.save_index(&file_prefix, options.minify_index_file.unwrap_or(false))
-    {
-        panic!("could not save sprite index to {file_prefix} ({e})");
-    };
+    Ok(Output {png, json})
 }
 
-#[unsafe(no_mangle)]
-pub fn _start() {}
-
-#[unsafe(no_mangle)]
-pub fn alloc_string(len: usize) -> *mut u8 {
-    let string = String::with_capacity(len);
-    let (ptr, _, _) = string.into_raw_parts();
-    ptr
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error(transparent)]
+    Usvg(#[from] usvg::Error),
+    #[error(transparent)]
+    Spreet(#[from] spreet::SpreetError),
+    #[error("failed to load SDF sprite: {0}")]
+    SdfSprite(String),
+    #[error("failed to load sprite: {0}")]
+    Sprite(String),
+    #[error("could not pack the sprites within an area fifty times their size")]
+    Generate,
 }
 
-unsafe fn load_string(buf: *mut u8, len: usize) -> String {
-    let buf = unsafe { Vec::from_raw_parts(buf, len, len) };
-    String::from_utf8(buf).expect("valid utf-8 string")
+impl From<Error> for JsValue {
+    fn from(value: Error) -> Self {
+        let msg = value.to_string();
+
+        use ImplErrorKind as Kind;
+        let (kind, sprite) = match value {
+            Error::Usvg(_) => (Kind::Usvg, None),
+            Error::Spreet(_) => (Kind::Spreet, None),
+            Error::SdfSprite(sprite) => (Kind::SdfSprite, Some(sprite)),
+            Error::Sprite(sprite) => (Kind::Sprite, Some(sprite)),
+            Error::Generate => (Kind::Generate, None),
+        };
+
+        serde_wasm_bindgen::to_value(&ImplError {
+            kind,
+            msg,
+            sprite,
+        }).unwrap()
+    }
+}
+
+#[derive(Debug, Serialize, Tsify)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum ImplErrorKind {
+    Usvg,
+    Spreet,
+    SdfSprite,
+    Sprite,
+    Generate,
+}
+
+#[derive(Debug, Serialize, Tsify)]
+pub struct ImplError {
+    pub kind: ImplErrorKind,
+    pub msg: String,
+    pub sprite: Option<String>,
 }

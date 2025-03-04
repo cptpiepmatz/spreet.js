@@ -9,7 +9,8 @@ export def "build" [] {
 }
 
 export def "build wasm" [] {
-  ^cargo build --target wasm32-wasip1 --release
+  ^cargo build --target wasm32-unknown-unknown --release
+  ^wasm-bindgen target\wasm32-unknown-unknown\release\spreet_js_imports.wasm --out-dir imports --target deno
 }
 
 export def "build postbuild" [] {
@@ -17,6 +18,5 @@ export def "build postbuild" [] {
 }
 
 export def "test" [] {
-  ^npm install --no-save ts-node
-  ^node --loader ts-node/esm --test tests\plugin.test.mts
+  ^deno test --allow-read --allow-write
 }
