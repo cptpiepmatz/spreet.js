@@ -47,7 +47,7 @@ jobs:
           deno-version: v2.x
 
       - name: Run E2E tests
-        run: deno test --allow-write --allow-read
+        run: deno test --allow-all
 
       - uses: actions/upload-artifact@v4
         with:
